@@ -1,0 +1,29 @@
+type: object
+description: Response for authentication operations
+properties:
+  status:
+    $ref: "../../openapi.yml#/components/schemas/ApiResponseStatus"
+  data:
+    type: object
+    properties:
+      message:
+        type: string
+        description: Success message
+        example: "Authentication successful"
+      userRegistered:
+        type: boolean
+        description: Whether a new user was registered in the database
+        example: true
+      userUpgraded:
+        type: boolean
+        description: Whether an anonymous user was upgraded to regular (signup only)
+        example: false
+      isAnonymous:
+        type: boolean
+        description: Whether the authenticated user is anonymous
+        example: false
+    required:
+      - message
+required:
+  - status
+  - data

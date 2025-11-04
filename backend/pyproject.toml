@@ -1,0 +1,18 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "Backend for the Simple Note Application"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "boto3",
+    "firebase-admin",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "freezegun",
+]

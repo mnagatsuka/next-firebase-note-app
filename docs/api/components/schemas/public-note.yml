@@ -1,0 +1,42 @@
+type: object
+description: A public note that can be browsed and read by anyone, containing plain text content
+properties:
+  id:
+    type: string
+    format: uuid
+    description: Unique identifier for the note
+    example: "550e8400-e29b-41d4-a716-446655440000"
+  title:
+    type: string
+    description: Title of the note
+    example: "Introduction to React Hooks"
+  content:
+    type: string
+    description: Note content in plain text format
+    example: "This is a simple plain text note about React Hooks. React Hooks are a powerful feature..."
+  author:
+    type: string
+    nullable: true
+    description: Display name of the author (null for anonymous authors)
+    example: "Jane Developer"
+  createdAt:
+    type: string
+    format: date-time
+    description: When the note was created
+    example: "2023-12-01T10:00:00Z"
+  updatedAt:
+    type: string
+    format: date-time
+    description: When the note was last updated
+    example: "2023-12-01T15:30:00Z"
+  isPublic:
+    type: boolean
+    description: Always true for public notes
+    example: true
+required:
+  - id
+  - title
+  - content
+  - createdAt
+  - updatedAt
+  - isPublic

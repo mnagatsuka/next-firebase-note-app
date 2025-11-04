@@ -1,0 +1,10 @@
+type: object
+description: Response wrapper for a single private note
+properties:
+  status:
+    $ref: "../../openapi.yml#/components/schemas/ApiResponseStatus"
+  data:
+    $ref: "../../openapi.yml#/components/schemas/PrivateNote"
+required:
+  - status
+  - data

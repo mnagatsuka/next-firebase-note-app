@@ -1,0 +1,201 @@
+/me/notes:
+  get:
+    summary: List user's private notes
+    description: |
+      Get user's private plain text notes in their personal notebook.
+      If user is not authenticated, this will automatically create an anonymous user and register them in the database.
+    operationId: getUserNotes
+    tags:
+      - Personal Notebook
+    security:
+      - SessionAuth: []
+      - BearerAuth: []
+    parameters:
+      - name: page
+        in: query
+        description: Page number (1-based)
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: limit
+        in: query
+        description: Number of notes per page
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+    responses:
+      '200':
+        description: List of user's private notes
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/PrivateNoteListResponse"
+      '401':
+        description: Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+  post:
+    summary: Create new private note
+    description: |
+      Create a new private plain text note.
+      If user is anonymous and not yet registered in database, they will be automatically registered.
+    operationId: createUserNote
+    tags:
+      - Personal Notebook
+    security:
+      - SessionAuth: []
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yml#/components/schemas/CreateNoteRequest"
+    responses:
+      '201':
+        description: Note created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/PrivateNoteResponse"
+      '400':
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+      '401':
+        description: Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+/me/notes/{id}:
+  get:
+    summary: Get user's private note
+    description: Retrieve a specific private note by ID
+    operationId: getUserNote
+    tags:
+      - Personal Notebook
+    security:
+      - SessionAuth: []
+      - BearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the note
+        schema:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+    responses:
+      '200':
+        description: Private note details
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/PrivateNoteResponse"
+      '404':
+        description: Note not found
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+      '401':
+        description: Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+  patch:
+    summary: Update private note
+    description: Update an existing private note
+    operationId: updateUserNote
+    tags:
+      - Personal Notebook
+    security:
+      - SessionAuth: []
+      - BearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the note
+        schema:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yml#/components/schemas/UpdateNoteRequest"
+    responses:
+      '200':
+        description: Note updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/PrivateNoteResponse"
+      '400':
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+      '404':
+        description: Note not found
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+      '401':
+        description: Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+  delete:
+    summary: Delete private note
+    description: Delete a private note from user's notebook
+    operationId: deleteUserNote
+    tags:
+      - Personal Notebook
+    security:
+      - SessionAuth: []
+      - BearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the note
+        schema:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+    responses:
+      '204':
+        description: Note deleted successfully
+      '404':
+        description: Note not found
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+      '401':
+        description: Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"

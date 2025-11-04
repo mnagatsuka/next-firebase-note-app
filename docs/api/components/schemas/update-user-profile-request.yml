@@ -1,0 +1,35 @@
+type: object
+description: Request payload for updating user profile
+properties:
+  displayName:
+    type: string
+    nullable: true
+    minLength: 1
+    maxLength: 100
+    description: Updated display name
+    example: "Jane Smith"
+  avatarUrl:
+    type: string
+    nullable: true
+    format: uri
+    description: Updated avatar image URL
+    example: "https://example.com/avatars/jane-new.jpg"
+  settings:
+    type: object
+    description: Updated user settings
+    properties:
+      locale:
+        type: string
+        description: User's preferred locale
+        example: "en-US"
+      theme:
+        type: string
+        description: User's preferred theme
+        enum: ["light", "dark", "system"]
+        example: "light"
+      editor:
+        type: string
+        description: User's preferred editor mode
+        enum: ["rich", "markdown", "split"]
+        example: "rich"
+# All fields are optional for PATCH requests

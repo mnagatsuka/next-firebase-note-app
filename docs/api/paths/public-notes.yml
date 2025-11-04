@@ -1,0 +1,72 @@
+/notes:
+  get:
+    summary: List latest public notes
+    description: Get a paginated list of latest public notes in chronological order
+    operationId: listPublicNotes
+    tags:
+      - Public Notes
+    security:
+      - {}  # No auth required
+    parameters:
+      - name: page
+        in: query
+        description: Page number (1-based)
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          example: 1
+      - name: limit
+        in: query
+        description: Number of notes per page
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+          example: 20
+    responses:
+      '200':
+        description: List of public notes
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/NoteListResponse"
+      '400':
+        description: Invalid query parameters
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+/notes/{id}:
+  get:
+    summary: Get public note by ID
+    description: Retrieve a specific public note by its UUID
+    operationId: getPublicNote
+    tags:
+      - Public Notes
+    security:
+      - {}  # No auth required
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The UUID of the note
+        schema:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+    responses:
+      '200':
+        description: Public note details
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/NoteResponse"
+      '404':
+        description: Note not found
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"

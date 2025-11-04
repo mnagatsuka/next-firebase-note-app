@@ -1,0 +1,16 @@
+type: object
+description: Request payload for new regular user signup
+properties:
+  idToken:
+    type: string
+    description: Firebase new user ID token
+    example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+  displayName:
+    type: string
+    minLength: 1
+    maxLength: 100
+    description: User's display name
+    example: "Jane Smith"
+required:
+  - idToken
+  - displayName

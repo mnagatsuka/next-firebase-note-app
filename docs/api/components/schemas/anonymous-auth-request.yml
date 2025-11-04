@@ -1,0 +1,9 @@
+type: object
+description: Request payload for anonymous user authentication
+properties:
+  idToken:
+    type: string
+    description: Firebase anonymous user ID token
+    example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+required:
+  - idToken

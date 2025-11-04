@@ -1,0 +1,15 @@
+type: object
+description: Request payload for updating a private plain text note
+properties:
+  title:
+    type: string
+    minLength: 1
+    maxLength: 200
+    description: Updated title of the note
+    example: "My Updated Note Title"
+  content:
+    type: string
+    minLength: 1
+    description: Updated note content in plain text format
+    example: "Updated Note\n\nThis is the updated content..."
+# All fields are optional for PATCH requests

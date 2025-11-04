@@ -1,0 +1,59 @@
+type: object
+description: User profile information (available for regular users only)
+properties:
+  userId:
+    type: string
+    description: Firebase UID of the user
+    example: "user_789ghi"
+  displayName:
+    type: string
+    nullable: true
+    description: User's display name
+    example: "Jane Developer"
+  avatarUrl:
+    type: string
+    nullable: true
+    description: URL to user's avatar image
+    example: "https://example.com/avatars/jane.jpg"
+  settings:
+    type: object
+    description: User preferences and settings
+    properties:
+      locale:
+        type: string
+        description: User's preferred locale
+        example: "en-US"
+      theme:
+        type: string
+        description: User's preferred theme
+        enum: ["light", "dark", "system"]
+        example: "dark"
+      editor:
+        type: string
+        description: User's preferred editor mode
+        enum: ["rich", "markdown", "split"]
+        example: "split"
+    required:
+      - locale
+      - theme
+      - editor
+  isAnonymous:
+    type: boolean
+    description: Whether this is an anonymous user (always false for profiles)
+    example: false
+  createdAt:
+    type: string
+    format: date-time
+    description: When the user account was created
+    example: "2023-11-15T09:00:00Z"
+  updatedAt:
+    type: string
+    format: date-time
+    description: When the profile was last updated
+    example: "2023-12-01T12:00:00Z"
+required:
+  - userId
+  - settings
+  - isAnonymous
+  - createdAt
+  - updatedAt

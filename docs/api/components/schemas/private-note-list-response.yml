@@ -1,0 +1,21 @@
+type: object
+description: Response wrapper for a list of private notes
+properties:
+  status:
+    $ref: "../../openapi.yml#/components/schemas/ApiResponseStatus"
+  data:
+    type: object
+    properties:
+      notes:
+        type: array
+        items:
+          $ref: "../../openapi.yml#/components/schemas/PrivateNote"
+        description: Array of private notes
+      pagination:
+        $ref: "../../openapi.yml#/components/schemas/Pagination"
+    required:
+      - notes
+      - pagination
+required:
+  - status
+  - data

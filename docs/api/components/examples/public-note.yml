@@ -1,0 +1,8 @@
+value:
+  id: "550e8400-e29b-41d4-a716-446655440000"
+  title: "Introduction to React Hooks"
+  content: "React Hooks are a powerful feature that let you use state and other React features without writing a class.\n\nThe useState hook allows you to add state to functional components:\n\nconst [count, setCount] = useState(0);\n\nThis creates a state variable count with an initial value of 0."
+  author: "Jane Developer"
+  createdAt: "2023-12-01T10:00:00Z"
+  updatedAt: "2023-12-01T15:30:00Z"
+  isPublic: true

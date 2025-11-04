@@ -1,0 +1,314 @@
+/auth/anonymous:
+  post:
+    summary: Anonymous user authentication
+    description: |
+      Exchange a Firebase anonymous ID token for a session cookie.
+      
+      **Database Operation**: 
+      - If this is a new anonymous user, their data will be inserted into the database
+      - If this is an existing anonymous user, no database changes are made
+      
+      **Use Cases**:
+      - First visit to My Notebook page
+      - Clicking "My Notebook" button from home page
+    operationId: authenticateAnonymous
+    tags:
+      - Authentication
+    security:
+      - {}  # No auth required for anonymous login
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yml#/components/schemas/AnonymousAuthRequest"
+    responses:
+      '200':
+        description: Anonymous authentication successful, session cookie set
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/AuthResponse"
+            examples:
+              new_anonymous_user:
+                summary: New anonymous user registered
+                value:
+                  status: "success"
+                  data:
+                    message: "Anonymous user registered and authenticated"
+                    userRegistered: true
+                    isAnonymous: true
+              existing_anonymous_user:
+                summary: Existing anonymous user authenticated
+                value:
+                  status: "success"
+                  data:
+                    message: "Anonymous user authenticated"
+                    userRegistered: false
+                    isAnonymous: true
+      '400':
+        description: Invalid Firebase token
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+/auth/login:
+  post:
+    summary: Regular user login
+    description: |
+      Exchange a Firebase regular user ID token for a session cookie.
+      
+      **Database Operation**: 
+      - No database changes (user already exists)
+      
+      **Use Cases**:
+      - Existing regular users logging in
+      - Email/password authentication
+    operationId: loginRegularUser
+    tags:
+      - Authentication
+    security:
+      - {}  # No auth required for login
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yml#/components/schemas/LoginRequest"
+    responses:
+      '200':
+        description: Login successful, session cookie set
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/AuthResponse"
+            example:
+              status: "success"
+              data:
+                message: "User logged in successfully"
+                userRegistered: false
+                isAnonymous: false
+      '400':
+        description: Invalid Firebase token or credentials
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+      '401':
+        description: Invalid credentials
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+/auth/signup:
+  post:
+    summary: New regular user registration
+    description: |
+      Exchange a Firebase new user ID token for a session cookie and create user profile.
+      
+      **Database Operation**: 
+      - Insert new regular user data into the database
+      
+      **Use Cases**:
+      - Brand new users creating regular accounts (not from anonymous)
+      - Direct signup without anonymous session
+    operationId: signupNewUser
+    tags:
+      - Authentication
+    security:
+      - {}  # No auth required for signup
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yml#/components/schemas/SignupRequest"
+    responses:
+      '201':
+        description: New user account created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/AuthResponse"
+            example:
+              status: "success"
+              data:
+                message: "Account created successfully"
+                userRegistered: true
+                isAnonymous: false
+      '400':
+        description: Invalid request data or Firebase token
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+      '409':
+        description: User already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+/auth/promote:
+  post:
+    summary: Promote anonymous user to regular account
+    description: |
+      Convert an anonymous user to a regular user account using Firebase linkWithCredential.
+      This preserves the user's existing data while upgrading their account.
+      
+      **Database Operation**: 
+      - Update existing anonymous user data in database (anonymous → regular)
+      - Same UID is preserved, isAnonymous flag changes to false
+      
+      **Use Cases**:
+      - Anonymous users upgrading to regular accounts
+      - Preserves all existing notes and data
+    operationId: promoteAnonymousUser
+    tags:
+      - Authentication
+    security:
+      - SessionAuth: []  # Must be logged in as anonymous user
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yml#/components/schemas/PromoteRequest"
+    responses:
+      '200':
+        description: Anonymous user successfully promoted to regular account
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/AuthResponse"
+            example:
+              status: "success"
+              data:
+                message: "Account upgraded successfully. All your notes have been preserved."
+                userUpgraded: true
+                isAnonymous: false
+      '400':
+        description: Invalid request data or linking failed
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+            examples:
+              linking_failed:
+                summary: Credential linking failed
+                value:
+                  status: "error"
+                  error:
+                    code: "LINK_CREDENTIAL_FAILED"
+                    message: "Failed to link credentials. The email may already be in use."
+              invalid_credentials:
+                summary: Invalid credentials provided
+                value:
+                  status: "error"
+                  error:
+                    code: "INVALID_CREDENTIALS"
+                    message: "The provided credentials are invalid"
+      '409':
+        description: Account with these credentials already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+            example:
+              status: "error"
+              error:
+                code: "ACCOUNT_EXISTS"
+                message: "An account with this email already exists. Please login instead."
+      '401':
+        description: Authentication required (must be logged in as anonymous user)
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+/auth/logout:
+  post:
+    summary: Clear session cookie
+    description: |
+      Logout and clear the session cookie. 
+      This does not affect the Firebase client-side authentication state.
+      
+      **Database Operation**: 
+      - No database changes
+    operationId: logout
+    tags:
+      - Authentication
+    security:
+      - SessionAuth: []
+      - {}  # Allow logged-out users to call this
+    responses:
+      '200':
+        description: Logout successful
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/AuthResponse"
+            example:
+              status: "success"
+              data:
+                message: "Logged out successfully"
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+/auth/session:
+  get:
+    summary: Verify current session
+    description: |
+      Verify the current session and return user information.
+      This endpoint also ensures the user exists in the database and will create 
+      an anonymous user record if needed.
+      
+      **Database Operation**: 
+      - May insert anonymous user data if session exists but user not in DB
+    operationId: verifySession
+    tags:
+      - Authentication
+    security:
+      - SessionAuth: []
+      - BearerAuth: []
+    responses:
+      '200':
+        description: Session is valid
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/SessionResponse"
+            examples:
+              anonymous_user:
+                summary: Anonymous user session
+                value:
+                  status: "success"
+                  data:
+                    uid: "anonymous_user_123"
+                    email: null
+                    emailVerified: false
+                    isAnonymous: true
+                    customClaims: null
+              regular_user:
+                summary: Regular user session  
+                value:
+                  status: "success"
+                  data:
+                    uid: "user_789ghi"
+                    email: "jane@example.com"
+                    emailVerified: true
+                    isAnonymous: false
+                    customClaims: null
+      '401':
+        description: Invalid or expired session
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"

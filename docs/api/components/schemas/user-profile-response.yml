@@ -1,0 +1,10 @@
+type: object
+description: Response wrapper for user profile
+properties:
+  status:
+    $ref: "../../openapi.yml#/components/schemas/ApiResponseStatus"
+  data:
+    $ref: "../../openapi.yml#/components/schemas/UserProfile"
+required:
+  - status
+  - data

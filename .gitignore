@@ -1,0 +1,149 @@
+# Keep placeholders
+!.gitkeep
+
+# macOS
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env*
+!.env.example
+
+# Node / pnpm
+node_modules/
+.pnpm-store/
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+
+# Next.js / Vercel
+.next/
+out/
+.vercel/
+
+# Build outputs / caches
+dist
+storybook-static/
+logs/
+*.log
+*.log.*
+coverage/
+.nyc_output
+.turbo/
+.cache/
+
+# Testing artifacts
+.vitest/
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python / Backend
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+pytest.ini
+.coverage
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+cython_debug/
+
+# FastAPI / Python specific
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# AWS / Infrastructure
+aws-sam/.aws-sam/
+infrastructure/aws-sam/.aws-sam/
+infrastructure/serverless/.serverless/
+.aws/
+samconfig.toml.bak
+.chalice/
+
+# Docker
+Dockerfile.dockerignore
+
+# Firebase
+firebase-debug.log
+.firebase/
+.firebaserc
+firebase.json
+
+# Generated backend code (keep frontend generated code in git)
+backend/src/generated/**
+
+# LocalStack / DynamoDB Local
+.localstack/
+localstack_data/
+dynamodb_local_db/
+
+# MSW (Mock Service Worker)
+public/mockServiceWorker.js
+
+# Orval generated files
+orval.config.js
+
+# Pre-commit
+.pre-commit-config.yaml
+
+# Biome
+.biome-cache/
+
+# Ruff
+.ruff_cache/
+
+# Tailwind CSS
+**/.tailwindcss-cache
+
+# Redocly temporary working files
+docs/ui/temp/**
+!docs/ui/temp/**/.gitkeep
+!docs/ui/temp/api/README.md
+
+# Generated or local docs artifacts
+docs/**/.DS_Store
+docs/api/openapi.bundled.yml
+
+# Storybook build output
+storybook-static/
+build-storybook.log
+
+# Temp directories and files
+temp/
+*.tmp
+*.temp

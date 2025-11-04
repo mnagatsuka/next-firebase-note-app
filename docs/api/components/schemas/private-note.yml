@@ -1,0 +1,37 @@
+type: object
+description: A private plain text note in a user's personal notebook
+properties:
+  id:
+    type: string
+    format: uuid
+    description: Unique identifier for the private note
+    example: "550e8400-e29b-41d4-a716-446655440001"
+  userId:
+    type: string
+    description: Firebase UID of the note owner
+    example: "user_789ghi"
+  title:
+    type: string
+    description: Title of the note
+    example: "My Notes on React Hooks"
+  content:
+    type: string
+    description: Note content in plain text format
+    example: "My React Hooks Notes\n\nPersonal observations about hooks..."
+  createdAt:
+    type: string
+    format: date-time
+    description: When the note was created
+    example: "2023-12-01T11:00:00Z"
+  updatedAt:
+    type: string
+    format: date-time
+    description: When the note was last updated
+    example: "2023-12-01T16:45:00Z"
+required:
+  - id
+  - userId
+  - title
+  - content
+  - createdAt
+  - updatedAt

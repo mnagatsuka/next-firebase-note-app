@@ -1,0 +1,17 @@
+type: object
+description: Request payload for creating a new private plain text note
+properties:
+  title:
+    type: string
+    minLength: 1
+    maxLength: 200
+    description: Title of the note
+    example: "My New Note"
+  content:
+    type: string
+    minLength: 1
+    description: Note content in plain text format
+    example: "My Note\n\nThis is the content of my note..."
+required:
+  - title
+  - content

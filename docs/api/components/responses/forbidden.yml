@@ -1,0 +1,10 @@
+description: Access forbidden (e.g., anonymous user accessing regular user features)
+content:
+  application/json:
+    schema:
+      $ref: "../../openapi.yml#/components/schemas/ErrorResponse"
+    example:
+      status: "error"
+      error:
+        code: "FORBIDDEN"
+        message: "Anonymous users cannot access this feature. Please create an account."

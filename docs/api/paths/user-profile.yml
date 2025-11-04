@@ -1,0 +1,79 @@
+/me:
+  get:
+    summary: Get user profile
+    description: |
+      Get current user's profile information (regular users only).
+      Anonymous users will receive a 403 error.
+    operationId: getUserProfile
+    tags:
+      - User Profile
+    security:
+      - SessionAuth: []
+      - BearerAuth: []
+    responses:
+      '200':
+        description: User profile information
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/UserProfileResponse"
+      '403':
+        description: Anonymous users cannot access profile
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+            example:
+              status: "error"
+              error:
+                code: "ANONYMOUS_PROFILE_FORBIDDEN"
+                message: "Anonymous users do not have profiles. Please create an account to access profile features."
+      '401':
+        description: Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+
+  patch:
+    summary: Update user profile
+    description: |
+      Update current user's profile information (regular users only).
+      Anonymous users will receive a 403 error.
+    operationId: updateUserProfile
+    tags:
+      - User Profile
+    security:
+      - SessionAuth: []
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yml#/components/schemas/UpdateUserProfileRequest"
+    responses:
+      '200':
+        description: Profile updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/UserProfileResponse"
+      '400':
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+      '403':
+        description: Anonymous users cannot update profile
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"
+      '401':
+        description: Authentication required
+        content:
+          application/json:
+            schema:
+              $ref: "../openapi.yml#/components/schemas/ErrorResponse"

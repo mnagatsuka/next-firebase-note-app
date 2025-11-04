@@ -1,0 +1,9 @@
+type: object
+description: Request payload for exchanging Firebase token for session
+properties:
+  idToken:
+    type: string
+    description: Firebase ID token to exchange for session cookie
+    example: "eyJhbGciOiJSUzI1NiIsImtpZCI6IjNmYmIwZDk4..."
+required:
+  - idToken

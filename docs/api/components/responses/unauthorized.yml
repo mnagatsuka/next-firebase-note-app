@@ -1,0 +1,10 @@
+description: Authentication required
+content:
+  application/json:
+    schema:
+      $ref: "../../openapi.yml#/components/schemas/ErrorResponse"
+    example:
+      status: "error"
+      error:
+        code: "UNAUTHORIZED"
+        message: "Authentication required to access this resource"

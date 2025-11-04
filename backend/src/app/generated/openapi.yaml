@@ -1,0 +1,1752 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: "A simple note-taking application API that allows anonymous browsing\
+    \ of latest public notes \nand authenticated access to personal plain text notebook\
+    \ features.\n\n## Authentication\n- Public endpoints require no authentication\n\
+    - Private endpoints use Firebase Auth with session cookies\n- Anonymous users\
+    \ are automatically created for notebook access\n- Regular users can access basic\
+    \ profile management features\n"
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Simple Note Application API
+  version: 1.0.0
+servers:
+- description: Production server
+  url: https://api.noteapp.com
+- description: Staging server
+  url: https://staging-api.noteapp.com
+- description: Local development server
+  url: http://dev-api.noteapp.com
+security:
+- SessionAuth: []
+- BearerAuth: []
+- {}
+tags:
+- description: Public latest notes browsing (no authentication required)
+  name: Public Notes
+- description: Private plain text note management (anonymous and regular users)
+  name: Personal Notebook
+- description: Basic user profile management (regular users only)
+  name: User Profile
+- description: Authentication and session management
+  name: Authentication
+paths:
+  /notes:
+    get:
+      description: Get a paginated list of latest public notes in chronological order
+      operationId: listPublicNotes
+      parameters:
+      - description: Page number (1-based)
+        in: query
+        name: page
+        schema:
+          default: 1
+          example: 1
+          minimum: 1
+          type: integer
+      - description: Number of notes per page
+        in: query
+        name: limit
+        schema:
+          default: 20
+          example: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NoteListResponse"
+          description: List of public notes
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid query parameters
+      security:
+      - {}
+      summary: List latest public notes
+      tags:
+      - Public Notes
+  /notes/{id}:
+    get:
+      description: Retrieve a specific public note by its UUID
+      operationId: getPublicNote
+      parameters:
+      - description: The UUID of the note
+        in: path
+        name: id
+        required: true
+        schema:
+          example: 550e8400-e29b-41d4-a716-446655440000
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NoteResponse"
+          description: Public note details
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Note not found
+      security:
+      - {}
+      summary: Get public note by ID
+      tags:
+      - Public Notes
+  /me/notes:
+    get:
+      description: |
+        Get user's private plain text notes in their personal notebook.
+        If user is not authenticated, this will automatically create an anonymous user and register them in the database.
+      operationId: getUserNotes
+      parameters:
+      - description: Page number (1-based)
+        in: query
+        name: page
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+      - description: Number of notes per page
+        in: query
+        name: limit
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivateNoteListResponse"
+          description: List of user's private notes
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Authentication required
+      security:
+      - SessionAuth: []
+      - BearerAuth: []
+      summary: List user's private notes
+      tags:
+      - Personal Notebook
+    post:
+      description: |
+        Create a new private plain text note.
+        If user is anonymous and not yet registered in database, they will be automatically registered.
+      operationId: createUserNote
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNoteRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivateNoteResponse"
+          description: Note created successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid request data
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Authentication required
+      security:
+      - SessionAuth: []
+      - BearerAuth: []
+      summary: Create new private note
+      tags:
+      - Personal Notebook
+  /me/notes/{id}:
+    delete:
+      description: Delete a private note from user's notebook
+      operationId: deleteUserNote
+      parameters:
+      - description: The ID of the note
+        in: path
+        name: id
+        required: true
+        schema:
+          example: 550e8400-e29b-41d4-a716-446655440000
+          format: uuid
+          type: string
+      responses:
+        "204":
+          description: Note deleted successfully
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Note not found
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Authentication required
+      security:
+      - SessionAuth: []
+      - BearerAuth: []
+      summary: Delete private note
+      tags:
+      - Personal Notebook
+    get:
+      description: Retrieve a specific private note by ID
+      operationId: getUserNote
+      parameters:
+      - description: The ID of the note
+        in: path
+        name: id
+        required: true
+        schema:
+          example: 550e8400-e29b-41d4-a716-446655440000
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivateNoteResponse"
+          description: Private note details
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Note not found
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Authentication required
+      security:
+      - SessionAuth: []
+      - BearerAuth: []
+      summary: Get user's private note
+      tags:
+      - Personal Notebook
+    patch:
+      description: Update an existing private note
+      operationId: updateUserNote
+      parameters:
+      - description: The ID of the note
+        in: path
+        name: id
+        required: true
+        schema:
+          example: 550e8400-e29b-41d4-a716-446655440000
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNoteRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivateNoteResponse"
+          description: Note updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid request data
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Note not found
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Authentication required
+      security:
+      - SessionAuth: []
+      - BearerAuth: []
+      summary: Update private note
+      tags:
+      - Personal Notebook
+  /me:
+    get:
+      description: |
+        Get current user's profile information (regular users only).
+        Anonymous users will receive a 403 error.
+      operationId: getUserProfile
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
+          description: User profile information
+        "403":
+          content:
+            application/json:
+              example:
+                status: error
+                error:
+                  code: ANONYMOUS_PROFILE_FORBIDDEN
+                  message: Anonymous users do not have profiles. Please create an
+                    account to access profile features.
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Anonymous users cannot access profile
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Authentication required
+      security:
+      - SessionAuth: []
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - User Profile
+    patch:
+      description: |
+        Update current user's profile information (regular users only).
+        Anonymous users will receive a 403 error.
+      operationId: updateUserProfile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserProfileRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
+          description: Profile updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid request data
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Anonymous users cannot update profile
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Authentication required
+      security:
+      - SessionAuth: []
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - User Profile
+  /auth/anonymous:
+    post:
+      description: "Exchange a Firebase anonymous ID token for a session cookie.\n\
+        \n**Database Operation**: \n- If this is a new anonymous user, their data\
+        \ will be inserted into the database\n- If this is an existing anonymous user,\
+        \ no database changes are made\n\n**Use Cases**:\n- First visit to My Notebook\
+        \ page\n- Clicking \"My Notebook\" button from home page\n"
+      operationId: authenticateAnonymous
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnonymousAuthRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                new_anonymous_user:
+                  summary: New anonymous user registered
+                  value:
+                    status: success
+                    data:
+                      message: Anonymous user registered and authenticated
+                      userRegistered: true
+                      isAnonymous: true
+                existing_anonymous_user:
+                  summary: Existing anonymous user authenticated
+                  value:
+                    status: success
+                    data:
+                      message: Anonymous user authenticated
+                      userRegistered: false
+                      isAnonymous: true
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+          description: "Anonymous authentication successful, session cookie set"
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid Firebase token
+      security:
+      - {}
+      summary: Anonymous user authentication
+      tags:
+      - Authentication
+  /auth/login:
+    post:
+      description: "Exchange a Firebase regular user ID token for a session cookie.\n\
+        \n**Database Operation**: \n- No database changes (user already exists)\n\n\
+        **Use Cases**:\n- Existing regular users logging in\n- Email/password authentication\n"
+      operationId: loginRegularUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                status: success
+                data:
+                  message: User logged in successfully
+                  userRegistered: false
+                  isAnonymous: false
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+          description: "Login successful, session cookie set"
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid Firebase token or credentials
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid credentials
+      security:
+      - {}
+      summary: Regular user login
+      tags:
+      - Authentication
+  /auth/signup:
+    post:
+      description: "Exchange a Firebase new user ID token for a session cookie and\
+        \ create user profile.\n\n**Database Operation**: \n- Insert new regular user\
+        \ data into the database\n\n**Use Cases**:\n- Brand new users creating regular\
+        \ accounts (not from anonymous)\n- Direct signup without anonymous session\n"
+      operationId: signupNewUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              example:
+                status: success
+                data:
+                  message: Account created successfully
+                  userRegistered: true
+                  isAnonymous: false
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+          description: New user account created successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid request data or Firebase token
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: User already exists
+      security:
+      - {}
+      summary: New regular user registration
+      tags:
+      - Authentication
+  /auth/promote:
+    post:
+      description: "Convert an anonymous user to a regular user account using Firebase\
+        \ linkWithCredential.\nThis preserves the user's existing data while upgrading\
+        \ their account.\n\n**Database Operation**: \n- Update existing anonymous\
+        \ user data in database (anonymous → regular)\n- Same UID is preserved, isAnonymous\
+        \ flag changes to false\n\n**Use Cases**:\n- Anonymous users upgrading to\
+        \ regular accounts\n- Preserves all existing notes and data\n"
+      operationId: promoteAnonymousUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromoteRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                status: success
+                data:
+                  message: Account upgraded successfully. All your notes have been
+                    preserved.
+                  userUpgraded: true
+                  isAnonymous: false
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+          description: Anonymous user successfully promoted to regular account
+        "400":
+          content:
+            application/json:
+              examples:
+                linking_failed:
+                  summary: Credential linking failed
+                  value:
+                    status: error
+                    error:
+                      code: LINK_CREDENTIAL_FAILED
+                      message: Failed to link credentials. The email may already be
+                        in use.
+                invalid_credentials:
+                  summary: Invalid credentials provided
+                  value:
+                    status: error
+                    error:
+                      code: INVALID_CREDENTIALS
+                      message: The provided credentials are invalid
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid request data or linking failed
+        "409":
+          content:
+            application/json:
+              example:
+                status: error
+                error:
+                  code: ACCOUNT_EXISTS
+                  message: An account with this email already exists. Please login
+                    instead.
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Account with these credentials already exists
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Authentication required (must be logged in as anonymous user)
+      security:
+      - SessionAuth: []
+      - BearerAuth: []
+      summary: Promote anonymous user to regular account
+      tags:
+      - Authentication
+  /auth/logout:
+    post:
+      description: "Logout and clear the session cookie. \nThis does not affect the\
+        \ Firebase client-side authentication state.\n\n**Database Operation**: \n\
+        - No database changes\n"
+      operationId: logout
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                status: success
+                data:
+                  message: Logged out successfully
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+          description: Logout successful
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad request
+      security:
+      - SessionAuth: []
+      - {}
+      summary: Clear session cookie
+      tags:
+      - Authentication
+  /auth/session:
+    get:
+      description: "Verify the current session and return user information.\nThis\
+        \ endpoint also ensures the user exists in the database and will create \n\
+        an anonymous user record if needed.\n\n**Database Operation**: \n- May insert\
+        \ anonymous user data if session exists but user not in DB\n"
+      operationId: verifySession
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                anonymous_user:
+                  summary: Anonymous user session
+                  value:
+                    status: success
+                    data:
+                      uid: anonymous_user_123
+                      email: null
+                      emailVerified: false
+                      isAnonymous: true
+                      customClaims: null
+                regular_user:
+                  summary: Regular user session
+                  value:
+                    status: success
+                    data:
+                      uid: user_789ghi
+                      email: jane@example.com
+                      emailVerified: true
+                      isAnonymous: false
+                      customClaims: null
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+          description: Session is valid
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid or expired session
+      security:
+      - SessionAuth: []
+      - BearerAuth: []
+      summary: Verify current session
+      tags:
+      - Authentication
+components:
+  schemas:
+    PublicNote:
+      description: "A public note that can be browsed and read by anyone, containing\
+        \ plain text content"
+      example:
+        createdAt: 2023-12-01T10:00:00Z
+        author: Jane Developer
+        isPublic: true
+        id: 550e8400-e29b-41d4-a716-446655440000
+        title: Introduction to React Hooks
+        content: This is a simple plain text note about React Hooks. React Hooks are
+          a powerful feature...
+        updatedAt: 2023-12-01T15:30:00Z
+      properties:
+        id:
+          description: Unique identifier for the note
+          example: 550e8400-e29b-41d4-a716-446655440000
+          format: uuid
+          title: id
+          type: string
+        title:
+          description: Title of the note
+          example: Introduction to React Hooks
+          title: title
+          type: string
+        content:
+          description: Note content in plain text format
+          example: This is a simple plain text note about React Hooks. React Hooks
+            are a powerful feature...
+          title: content
+          type: string
+        author:
+          description: Display name of the author (null for anonymous authors)
+          example: Jane Developer
+          nullable: true
+          title: author
+          type: string
+        createdAt:
+          description: When the note was created
+          example: 2023-12-01T10:00:00Z
+          format: date-time
+          title: createdAt
+          type: string
+        updatedAt:
+          description: When the note was last updated
+          example: 2023-12-01T15:30:00Z
+          format: date-time
+          title: updatedAt
+          type: string
+        isPublic:
+          description: Always true for public notes
+          example: true
+          title: isPublic
+          type: boolean
+      required:
+      - content
+      - createdAt
+      - id
+      - isPublic
+      - title
+      - updatedAt
+      title: PublicNote
+      type: object
+    PrivateNote:
+      description: A private plain text note in a user's personal notebook
+      example:
+        createdAt: 2023-12-01T11:00:00Z
+        id: 550e8400-e29b-41d4-a716-446655440001
+        title: My Notes on React Hooks
+        userId: user_789ghi
+        content: |-
+          My React Hooks Notes
+
+          Personal observations about hooks...
+        updatedAt: 2023-12-01T16:45:00Z
+      properties:
+        id:
+          description: Unique identifier for the private note
+          example: 550e8400-e29b-41d4-a716-446655440001
+          format: uuid
+          title: id
+          type: string
+        userId:
+          description: Firebase UID of the note owner
+          example: user_789ghi
+          title: userId
+          type: string
+        title:
+          description: Title of the note
+          example: My Notes on React Hooks
+          title: title
+          type: string
+        content:
+          description: Note content in plain text format
+          example: |-
+            My React Hooks Notes
+
+            Personal observations about hooks...
+          title: content
+          type: string
+        createdAt:
+          description: When the note was created
+          example: 2023-12-01T11:00:00Z
+          format: date-time
+          title: createdAt
+          type: string
+        updatedAt:
+          description: When the note was last updated
+          example: 2023-12-01T16:45:00Z
+          format: date-time
+          title: updatedAt
+          type: string
+      required:
+      - content
+      - createdAt
+      - id
+      - title
+      - updatedAt
+      - userId
+      title: PrivateNote
+      type: object
+    UserProfile:
+      description: User profile information (available for regular users only)
+      example:
+        settings:
+          editor: split
+          theme: dark
+          locale: en-US
+        createdAt: 2023-11-15T09:00:00Z
+        isAnonymous: false
+        avatarUrl: https://example.com/avatars/jane.jpg
+        displayName: Jane Developer
+        userId: user_789ghi
+        updatedAt: 2023-12-01T12:00:00Z
+      properties:
+        userId:
+          description: Firebase UID of the user
+          example: user_789ghi
+          title: userId
+          type: string
+        displayName:
+          description: User's display name
+          example: Jane Developer
+          nullable: true
+          title: displayName
+          type: string
+        avatarUrl:
+          description: URL to user's avatar image
+          example: https://example.com/avatars/jane.jpg
+          nullable: true
+          title: avatarUrl
+          type: string
+        settings:
+          $ref: "#/components/schemas/UserProfile_settings"
+        isAnonymous:
+          description: Whether this is an anonymous user (always false for profiles)
+          example: false
+          title: isAnonymous
+          type: boolean
+        createdAt:
+          description: When the user account was created
+          example: 2023-11-15T09:00:00Z
+          format: date-time
+          title: createdAt
+          type: string
+        updatedAt:
+          description: When the profile was last updated
+          example: 2023-12-01T12:00:00Z
+          format: date-time
+          title: updatedAt
+          type: string
+      required:
+      - createdAt
+      - isAnonymous
+      - settings
+      - updatedAt
+      - userId
+      title: UserProfile
+      type: object
+    NoteResponse:
+      $ref: "#/components/schemas/note-response"
+    PrivateNoteResponse:
+      $ref: "#/components/schemas/private-note-response"
+    NoteListResponse:
+      $ref: "#/components/schemas/note-list-response"
+    PrivateNoteListResponse:
+      $ref: "#/components/schemas/private-note-list-response"
+    UserProfileResponse:
+      $ref: "#/components/schemas/user-profile-response"
+    AuthResponse:
+      $ref: "#/components/schemas/auth-response"
+    SessionResponse:
+      $ref: "#/components/schemas/session-response"
+    ErrorResponse:
+      $ref: "#/components/schemas/error-response"
+    CreateNoteRequest:
+      $ref: "#/components/schemas/create-note-request"
+    UpdateNoteRequest:
+      $ref: "#/components/schemas/update-note-request"
+    UpdateUserProfileRequest:
+      $ref: "#/components/schemas/update-user-profile-request"
+    AnonymousAuthRequest:
+      $ref: "#/components/schemas/anonymous-auth-request"
+    LoginRequest:
+      $ref: "#/components/schemas/login-request"
+    SignupRequest:
+      $ref: "#/components/schemas/signup-request"
+    PromoteRequest:
+      $ref: "#/components/schemas/promote-request"
+    Pagination:
+      description: Pagination metadata for list responses
+      example:
+        total: 157
+        hasPrev: true
+        limit: 20
+        hasNext: true
+        page: 2
+      properties:
+        page:
+          description: Current page number (1-based)
+          example: 2
+          minimum: 1
+          title: page
+          type: integer
+        limit:
+          description: Number of items per page
+          example: 20
+          maximum: 100
+          minimum: 1
+          title: limit
+          type: integer
+        total:
+          description: Total number of items across all pages
+          example: 157
+          minimum: 0
+          title: total
+          type: integer
+        hasNext:
+          description: Whether there are more pages available
+          example: true
+          title: hasNext
+          type: boolean
+        hasPrev:
+          description: Whether there are previous pages available
+          example: true
+          title: hasPrev
+          type: boolean
+      required:
+      - hasNext
+      - hasPrev
+      - limit
+      - page
+      - total
+      title: Pagination
+      type: object
+    ApiResponseStatus:
+      description: Status of the API response
+      enum:
+      - success
+      - error
+      example: success
+      title: ApiResponseStatus
+      type: string
+    ErrorDetail:
+      description: Detailed error information
+      example:
+        code: INVALID_REQUEST
+        field: title
+        message: The provided data is invalid
+      properties:
+        code:
+          description: Error code for programmatic handling
+          example: INVALID_REQUEST
+          title: code
+          type: string
+        message:
+          description: Human-readable error message
+          example: The provided data is invalid
+          title: message
+          type: string
+        field:
+          description: Field name that caused the error (if applicable)
+          example: title
+          nullable: true
+          title: field
+          type: string
+      required:
+      - code
+      - message
+      title: ErrorDetail
+      type: object
+    note-list-response:
+      description: Response wrapper for a list of public notes
+      example:
+        data:
+          notes:
+          - createdAt: 2023-12-01T10:00:00Z
+            author: Jane Developer
+            isPublic: true
+            id: 550e8400-e29b-41d4-a716-446655440000
+            title: Introduction to React Hooks
+            content: This is a simple plain text note about React Hooks. React Hooks
+              are a powerful feature...
+            updatedAt: 2023-12-01T15:30:00Z
+          - createdAt: 2023-12-01T10:00:00Z
+            author: Jane Developer
+            isPublic: true
+            id: 550e8400-e29b-41d4-a716-446655440000
+            title: Introduction to React Hooks
+            content: This is a simple plain text note about React Hooks. React Hooks
+              are a powerful feature...
+            updatedAt: 2023-12-01T15:30:00Z
+          pagination:
+            total: 157
+            hasPrev: true
+            limit: 20
+            hasNext: true
+            page: 2
+        status: success
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiResponseStatus"
+        data:
+          $ref: "#/components/schemas/note_list_response_data"
+      required:
+      - data
+      - status
+      title: note-list-response
+      type: object
+    error-response:
+      description: Error response wrapper
+      example:
+        error:
+          code: INVALID_REQUEST
+          field: title
+          message: The provided data is invalid
+        status: success
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiResponseStatus"
+        error:
+          $ref: "#/components/schemas/ErrorDetail"
+      required:
+      - error
+      - status
+      title: error-response
+      type: object
+    note-response:
+      description: Response wrapper for a single public note
+      example:
+        data:
+          createdAt: 2023-12-01T10:00:00Z
+          author: Jane Developer
+          isPublic: true
+          id: 550e8400-e29b-41d4-a716-446655440000
+          title: Introduction to React Hooks
+          content: This is a simple plain text note about React Hooks. React Hooks
+            are a powerful feature...
+          updatedAt: 2023-12-01T15:30:00Z
+        status: success
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiResponseStatus"
+        data:
+          $ref: "#/components/schemas/PublicNote"
+      required:
+      - data
+      - status
+      title: note-response
+      type: object
+    private-note-list-response:
+      description: Response wrapper for a list of private notes
+      example:
+        data:
+          notes:
+          - createdAt: 2023-12-01T11:00:00Z
+            id: 550e8400-e29b-41d4-a716-446655440001
+            title: My Notes on React Hooks
+            userId: user_789ghi
+            content: |-
+              My React Hooks Notes
+
+              Personal observations about hooks...
+            updatedAt: 2023-12-01T16:45:00Z
+          - createdAt: 2023-12-01T11:00:00Z
+            id: 550e8400-e29b-41d4-a716-446655440001
+            title: My Notes on React Hooks
+            userId: user_789ghi
+            content: |-
+              My React Hooks Notes
+
+              Personal observations about hooks...
+            updatedAt: 2023-12-01T16:45:00Z
+          pagination:
+            total: 157
+            hasPrev: true
+            limit: 20
+            hasNext: true
+            page: 2
+        status: success
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiResponseStatus"
+        data:
+          $ref: "#/components/schemas/private_note_list_response_data"
+      required:
+      - data
+      - status
+      title: private-note-list-response
+      type: object
+    create-note-request:
+      description: Request payload for creating a new private plain text note
+      properties:
+        title:
+          description: Title of the note
+          example: My New Note
+          maxLength: 200
+          minLength: 1
+          title: title
+          type: string
+        content:
+          description: Note content in plain text format
+          example: |-
+            My Note
+
+            This is the content of my note...
+          minLength: 1
+          title: content
+          type: string
+      required:
+      - content
+      - title
+      title: create-note-request
+      type: object
+    private-note-response:
+      description: Response wrapper for a single private note
+      example:
+        data:
+          createdAt: 2023-12-01T11:00:00Z
+          id: 550e8400-e29b-41d4-a716-446655440001
+          title: My Notes on React Hooks
+          userId: user_789ghi
+          content: |-
+            My React Hooks Notes
+
+            Personal observations about hooks...
+          updatedAt: 2023-12-01T16:45:00Z
+        status: success
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiResponseStatus"
+        data:
+          $ref: "#/components/schemas/PrivateNote"
+      required:
+      - data
+      - status
+      title: private-note-response
+      type: object
+    update-note-request:
+      description: Request payload for updating a private plain text note
+      properties:
+        title:
+          description: Updated title of the note
+          example: My Updated Note Title
+          maxLength: 200
+          minLength: 1
+          title: title
+          type: string
+        content:
+          description: Updated note content in plain text format
+          example: |-
+            Updated Note
+
+            This is the updated content...
+          minLength: 1
+          title: content
+          type: string
+      title: update-note-request
+      type: object
+    user-profile-response:
+      description: Response wrapper for user profile
+      example:
+        data:
+          settings:
+            editor: split
+            theme: dark
+            locale: en-US
+          createdAt: 2023-11-15T09:00:00Z
+          isAnonymous: false
+          avatarUrl: https://example.com/avatars/jane.jpg
+          displayName: Jane Developer
+          userId: user_789ghi
+          updatedAt: 2023-12-01T12:00:00Z
+        status: success
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiResponseStatus"
+        data:
+          $ref: "#/components/schemas/UserProfile"
+      required:
+      - data
+      - status
+      title: user-profile-response
+      type: object
+    update-user-profile-request:
+      description: Request payload for updating user profile
+      properties:
+        displayName:
+          description: Updated display name
+          example: Jane Smith
+          maxLength: 100
+          minLength: 1
+          nullable: true
+          title: displayName
+          type: string
+        avatarUrl:
+          description: Updated avatar image URL
+          example: https://example.com/avatars/jane-new.jpg
+          format: uri
+          nullable: true
+          title: avatarUrl
+          type: string
+        settings:
+          $ref: "#/components/schemas/update_user_profile_request_settings"
+      title: update-user-profile-request
+      type: object
+    anonymous-auth-request:
+      description: Request payload for anonymous user authentication
+      properties:
+        idToken:
+          description: Firebase anonymous user ID token
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+          title: idToken
+          type: string
+      required:
+      - idToken
+      title: anonymous-auth-request
+      type: object
+    auth-response:
+      description: Response for authentication operations
+      example:
+        data:
+          isAnonymous: false
+          userUpgraded: false
+          message: Authentication successful
+          userRegistered: true
+        status: success
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiResponseStatus"
+        data:
+          $ref: "#/components/schemas/auth_response_data"
+      required:
+      - data
+      - status
+      title: auth-response
+      type: object
+    login-request:
+      description: Request payload for exchanging Firebase token for session
+      properties:
+        idToken:
+          description: Firebase ID token to exchange for session cookie
+          example: eyJhbGciOiJSUzI1NiIsImtpZCI6IjNmYmIwZDk4...
+          title: idToken
+          type: string
+      required:
+      - idToken
+      title: login-request
+      type: object
+    signup-request:
+      description: Request payload for new regular user signup
+      properties:
+        idToken:
+          description: Firebase new user ID token
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+          title: idToken
+          type: string
+        displayName:
+          description: User's display name
+          example: Jane Smith
+          maxLength: 100
+          minLength: 1
+          title: displayName
+          type: string
+      required:
+      - displayName
+      - idToken
+      title: signup-request
+      type: object
+    promote-request:
+      description: Request payload for promoting anonymous user to regular account
+      properties:
+        email:
+          description: Email for the new regular account
+          example: jane@example.com
+          format: email
+          title: email
+          type: string
+        password:
+          description: Password for the new regular account
+          example: securepassword123
+          minLength: 6
+          title: password
+          type: string
+        displayName:
+          description: User's display name
+          example: Jane Smith
+          maxLength: 100
+          minLength: 1
+          title: displayName
+          type: string
+      required:
+      - displayName
+      - email
+      - password
+      title: promote-request
+      type: object
+    session-response:
+      description: Response for session verification
+      example:
+        data:
+          uid: user_789ghi
+          emailVerified: true
+          isAnonymous: false
+          email: jane@example.com
+          customClaims:
+            key: ""
+        status: success
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiResponseStatus"
+        data:
+          $ref: "#/components/schemas/session_response_data"
+      required:
+      - data
+      - status
+      title: session-response
+      type: object
+    public-note:
+      description: "A public note that can be browsed and read by anyone, containing\
+        \ plain text content"
+      example:
+        createdAt: 2023-12-01T10:00:00Z
+        author: Jane Developer
+        isPublic: true
+        id: 550e8400-e29b-41d4-a716-446655440000
+        title: Introduction to React Hooks
+        content: This is a simple plain text note about React Hooks. React Hooks are
+          a powerful feature...
+        updatedAt: 2023-12-01T15:30:00Z
+      properties:
+        id:
+          description: Unique identifier for the note
+          example: 550e8400-e29b-41d4-a716-446655440000
+          format: uuid
+          title: id
+          type: string
+        title:
+          description: Title of the note
+          example: Introduction to React Hooks
+          title: title
+          type: string
+        content:
+          description: Note content in plain text format
+          example: This is a simple plain text note about React Hooks. React Hooks
+            are a powerful feature...
+          title: content
+          type: string
+        author:
+          description: Display name of the author (null for anonymous authors)
+          example: Jane Developer
+          nullable: true
+          title: author
+          type: string
+        createdAt:
+          description: When the note was created
+          example: 2023-12-01T10:00:00Z
+          format: date-time
+          title: createdAt
+          type: string
+        updatedAt:
+          description: When the note was last updated
+          example: 2023-12-01T15:30:00Z
+          format: date-time
+          title: updatedAt
+          type: string
+        isPublic:
+          description: Always true for public notes
+          example: true
+          title: isPublic
+          type: boolean
+      required:
+      - content
+      - createdAt
+      - id
+      - isPublic
+      - title
+      - updatedAt
+      title: PublicNote
+      type: object
+    private-note:
+      description: A private plain text note in a user's personal notebook
+      example:
+        createdAt: 2023-12-01T11:00:00Z
+        id: 550e8400-e29b-41d4-a716-446655440001
+        title: My Notes on React Hooks
+        userId: user_789ghi
+        content: |-
+          My React Hooks Notes
+
+          Personal observations about hooks...
+        updatedAt: 2023-12-01T16:45:00Z
+      properties:
+        id:
+          description: Unique identifier for the private note
+          example: 550e8400-e29b-41d4-a716-446655440001
+          format: uuid
+          title: id
+          type: string
+        userId:
+          description: Firebase UID of the note owner
+          example: user_789ghi
+          title: userId
+          type: string
+        title:
+          description: Title of the note
+          example: My Notes on React Hooks
+          title: title
+          type: string
+        content:
+          description: Note content in plain text format
+          example: |-
+            My React Hooks Notes
+
+            Personal observations about hooks...
+          title: content
+          type: string
+        createdAt:
+          description: When the note was created
+          example: 2023-12-01T11:00:00Z
+          format: date-time
+          title: createdAt
+          type: string
+        updatedAt:
+          description: When the note was last updated
+          example: 2023-12-01T16:45:00Z
+          format: date-time
+          title: updatedAt
+          type: string
+      required:
+      - content
+      - createdAt
+      - id
+      - title
+      - updatedAt
+      - userId
+      title: PrivateNote
+      type: object
+    user-profile:
+      description: User profile information (available for regular users only)
+      example:
+        settings:
+          editor: split
+          theme: dark
+          locale: en-US
+        createdAt: 2023-11-15T09:00:00Z
+        isAnonymous: false
+        avatarUrl: https://example.com/avatars/jane.jpg
+        displayName: Jane Developer
+        userId: user_789ghi
+        updatedAt: 2023-12-01T12:00:00Z
+      properties:
+        userId:
+          description: Firebase UID of the user
+          example: user_789ghi
+          title: userId
+          type: string
+        displayName:
+          description: User's display name
+          example: Jane Developer
+          nullable: true
+          title: displayName
+          type: string
+        avatarUrl:
+          description: URL to user's avatar image
+          example: https://example.com/avatars/jane.jpg
+          nullable: true
+          title: avatarUrl
+          type: string
+        settings:
+          $ref: "#/components/schemas/UserProfile_settings"
+        isAnonymous:
+          description: Whether this is an anonymous user (always false for profiles)
+          example: false
+          title: isAnonymous
+          type: boolean
+        createdAt:
+          description: When the user account was created
+          example: 2023-11-15T09:00:00Z
+          format: date-time
+          title: createdAt
+          type: string
+        updatedAt:
+          description: When the profile was last updated
+          example: 2023-12-01T12:00:00Z
+          format: date-time
+          title: updatedAt
+          type: string
+      required:
+      - createdAt
+      - isAnonymous
+      - settings
+      - updatedAt
+      - userId
+      title: UserProfile
+      type: object
+    api-response-status:
+      description: Status of the API response
+      enum:
+      - success
+      - error
+      example: success
+      title: ApiResponseStatus
+      type: string
+    error-detail:
+      description: Detailed error information
+      example:
+        code: INVALID_REQUEST
+        field: title
+        message: The provided data is invalid
+      properties:
+        code:
+          description: Error code for programmatic handling
+          example: INVALID_REQUEST
+          title: code
+          type: string
+        message:
+          description: Human-readable error message
+          example: The provided data is invalid
+          title: message
+          type: string
+        field:
+          description: Field name that caused the error (if applicable)
+          example: title
+          nullable: true
+          title: field
+          type: string
+      required:
+      - code
+      - message
+      title: ErrorDetail
+      type: object
+    UserProfile_settings:
+      description: User preferences and settings
+      example:
+        editor: split
+        theme: dark
+        locale: en-US
+      properties:
+        locale:
+          description: User's preferred locale
+          example: en-US
+          title: locale
+          type: string
+        theme:
+          description: User's preferred theme
+          enum:
+          - light
+          - dark
+          - system
+          example: dark
+          title: theme
+          type: string
+        editor:
+          description: User's preferred editor mode
+          enum:
+          - rich
+          - markdown
+          - split
+          example: split
+          title: editor
+          type: string
+      required:
+      - editor
+      - locale
+      - theme
+      title: UserProfile_settings
+      type: object
+    note_list_response_data:
+      example:
+        notes:
+        - createdAt: 2023-12-01T10:00:00Z
+          author: Jane Developer
+          isPublic: true
+          id: 550e8400-e29b-41d4-a716-446655440000
+          title: Introduction to React Hooks
+          content: This is a simple plain text note about React Hooks. React Hooks
+            are a powerful feature...
+          updatedAt: 2023-12-01T15:30:00Z
+        - createdAt: 2023-12-01T10:00:00Z
+          author: Jane Developer
+          isPublic: true
+          id: 550e8400-e29b-41d4-a716-446655440000
+          title: Introduction to React Hooks
+          content: This is a simple plain text note about React Hooks. React Hooks
+            are a powerful feature...
+          updatedAt: 2023-12-01T15:30:00Z
+        pagination:
+          total: 157
+          hasPrev: true
+          limit: 20
+          hasNext: true
+          page: 2
+      properties:
+        notes:
+          description: Array of public notes
+          items:
+            $ref: "#/components/schemas/PublicNote"
+          title: notes
+          type: array
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+      required:
+      - notes
+      - pagination
+      title: note_list_response_data
+      type: object
+    private_note_list_response_data:
+      example:
+        notes:
+        - createdAt: 2023-12-01T11:00:00Z
+          id: 550e8400-e29b-41d4-a716-446655440001
+          title: My Notes on React Hooks
+          userId: user_789ghi
+          content: |-
+            My React Hooks Notes
+
+            Personal observations about hooks...
+          updatedAt: 2023-12-01T16:45:00Z
+        - createdAt: 2023-12-01T11:00:00Z
+          id: 550e8400-e29b-41d4-a716-446655440001
+          title: My Notes on React Hooks
+          userId: user_789ghi
+          content: |-
+            My React Hooks Notes
+
+            Personal observations about hooks...
+          updatedAt: 2023-12-01T16:45:00Z
+        pagination:
+          total: 157
+          hasPrev: true
+          limit: 20
+          hasNext: true
+          page: 2
+      properties:
+        notes:
+          description: Array of private notes
+          items:
+            $ref: "#/components/schemas/PrivateNote"
+          title: notes
+          type: array
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+      required:
+      - notes
+      - pagination
+      title: private_note_list_response_data
+      type: object
+    update_user_profile_request_settings:
+      description: Updated user settings
+      properties:
+        locale:
+          description: User's preferred locale
+          example: en-US
+          title: locale
+          type: string
+        theme:
+          description: User's preferred theme
+          enum:
+          - light
+          - dark
+          - system
+          example: light
+          title: theme
+          type: string
+        editor:
+          description: User's preferred editor mode
+          enum:
+          - rich
+          - markdown
+          - split
+          example: rich
+          title: editor
+          type: string
+      title: update_user_profile_request_settings
+      type: object
+    auth_response_data:
+      example:
+        isAnonymous: false
+        userUpgraded: false
+        message: Authentication successful
+        userRegistered: true
+      properties:
+        message:
+          description: Success message
+          example: Authentication successful
+          title: message
+          type: string
+        userRegistered:
+          description: Whether a new user was registered in the database
+          example: true
+          title: userRegistered
+          type: boolean
+        userUpgraded:
+          description: Whether an anonymous user was upgraded to regular (signup only)
+          example: false
+          title: userUpgraded
+          type: boolean
+        isAnonymous:
+          description: Whether the authenticated user is anonymous
+          example: false
+          title: isAnonymous
+          type: boolean
+      required:
+      - message
+      title: auth_response_data
+      type: object
+    session_response_data:
+      example:
+        uid: user_789ghi
+        emailVerified: true
+        isAnonymous: false
+        email: jane@example.com
+        customClaims:
+          key: ""
+      properties:
+        uid:
+          description: Firebase UID of the authenticated user
+          example: user_789ghi
+          title: uid
+          type: string
+        email:
+          description: User's email address (null for anonymous users)
+          example: jane@example.com
+          format: email
+          nullable: true
+          title: email
+          type: string
+        emailVerified:
+          description: Whether the user's email is verified
+          example: true
+          title: emailVerified
+          type: boolean
+        isAnonymous:
+          description: Whether this is an anonymous user
+          example: false
+          title: isAnonymous
+          type: boolean
+        customClaims:
+          additionalProperties: true
+          description: Custom claims from Firebase Auth
+          nullable: true
+          title: customClaims
+          type: object
+          example: null
+      required:
+      - emailVerified
+      - isAnonymous
+      - uid
+      title: session_response_data
+      type: object
+  securitySchemes:
+    SessionAuth:
+      description: Firebase session cookie
+      in: cookie
+      name: __session
+      type: apiKey
+    BearerAuth:
+      bearerFormat: JWT
+      description: Firebase ID token
+      scheme: bearer
+      type: http

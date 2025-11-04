@@ -1,0 +1,19 @@
+{
+  "packageManager": "pnpm@10.14.0",
+  "scripts": {
+    "api:lint": "redocly lint docs/api/openapi.yml",
+    "api:bun": "redocly bundle docs/api/openapi.yml -o docs/api/openapi.bundled.yml --remove-unused-components",
+		"api:be": "pnpm api:bun && openapi-generator-cli generate -c openapi-generator.config.json",
+		"api:fe": "pnpm api:bun && orval --config orval.config.ts",
+		"doc:pj": "redocly preview --project-dir=./docs --port=8081",
+		"doc:api": "pnpm api:bun && pnpm exec redocly build-docs docs/api/openapi.bundled.yml -o docs/api/index.html && open docs/api/index.html",
+    "fb:emu": "firebase emulators:start",
+    "fb:emu:auth": "firebase emulators:start --only auth",
+    "fb:emu:auth:clean": "rimraf ./.emulator-data && firebase emulators:start --only auth --import ./.emulator-data --export-on-exit"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^2.0.8",
+		"@openapitools/openapi-generator-cli": "^2.23.1",
+		"orval": "^7.11.2"
+  }
+}

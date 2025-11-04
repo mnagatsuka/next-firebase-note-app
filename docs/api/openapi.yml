@@ -1,0 +1,137 @@
+openapi: 3.0.3
+info:
+  title: Simple Note Application API
+  version: 1.0.0
+  description: |
+    A simple note-taking application API that allows anonymous browsing of latest public notes 
+    and authenticated access to personal plain text notebook features.
+    
+    ## Authentication
+    - Public endpoints require no authentication
+    - Private endpoints use Firebase Auth with session cookies
+    - Anonymous users are automatically created for notebook access
+    - Regular users can access basic profile management features
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.noteapp.com
+    description: Production server
+  - url: https://staging-api.noteapp.com
+    description: Staging server
+  - url: http://dev-api.noteapp.com
+    description: Local development server
+
+security:
+  - SessionAuth: []
+  - BearerAuth: []
+  - {}  # Allow no auth for public endpoints
+
+paths:
+  # Public Note Library Endpoints  
+  /notes:
+    $ref: './paths/public-notes.yml#/~1notes'
+  /notes/{id}:
+    $ref: './paths/public-notes.yml#/~1notes~1{id}'
+    
+  # Personal Notebook Endpoints (Anonymous & Regular Users)
+  /me/notes:
+    $ref: './paths/personal-notebook.yml#/~1me~1notes'
+  /me/notes/{id}:
+    $ref: './paths/personal-notebook.yml#/~1me~1notes~1{id}'
+    
+  # User Profile Endpoints (Regular Users Only)  
+  /me:
+    $ref: './paths/user-profile.yml#/~1me'
+    
+  # Authentication Bridge Endpoints
+  /auth/anonymous:
+    $ref: './paths/authentication.yml#/~1auth~1anonymous'
+  /auth/login:
+    $ref: './paths/authentication.yml#/~1auth~1login'
+  /auth/signup:
+    $ref: './paths/authentication.yml#/~1auth~1signup'
+  /auth/promote:
+    $ref: './paths/authentication.yml#/~1auth~1promote'
+  /auth/logout:
+    $ref: './paths/authentication.yml#/~1auth~1logout'
+  /auth/session:
+    $ref: './paths/authentication.yml#/~1auth~1session'
+
+components:
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: cookie
+      name: __session
+      description: Firebase session cookie
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Firebase ID token
+
+  schemas:
+    # Core Data Models
+    PublicNote:
+      $ref: './components/schemas/public-note.yml'
+    PrivateNote:
+      $ref: './components/schemas/private-note.yml'
+    UserProfile:
+      $ref: './components/schemas/user-profile.yml'
+
+    # Response Wrappers
+    NoteResponse:
+      $ref: './components/schemas/note-response.yml'
+    PrivateNoteResponse:
+      $ref: './components/schemas/private-note-response.yml'
+    NoteListResponse:
+      $ref: './components/schemas/note-list-response.yml'
+    PrivateNoteListResponse:
+      $ref: './components/schemas/private-note-list-response.yml'
+    UserProfileResponse:
+      $ref: './components/schemas/user-profile-response.yml'
+    AuthResponse:
+      $ref: './components/schemas/auth-response.yml'
+    SessionResponse:
+      $ref: './components/schemas/session-response.yml'
+    ErrorResponse:
+      $ref: './components/schemas/error-response.yml'
+
+    # Request Models
+    CreateNoteRequest:
+      $ref: './components/schemas/create-note-request.yml'
+    UpdateNoteRequest:
+      $ref: './components/schemas/update-note-request.yml'
+    UpdateUserProfileRequest:
+      $ref: './components/schemas/update-user-profile-request.yml'
+    AnonymousAuthRequest:
+      $ref: './components/schemas/anonymous-auth-request.yml'
+    LoginRequest:
+      $ref: './components/schemas/login-request.yml'
+    SignupRequest:
+      $ref: './components/schemas/signup-request.yml'
+    PromoteRequest:
+      $ref: './components/schemas/promote-request.yml'
+
+    # Common Components
+    Pagination:
+      $ref: './components/schemas/pagination.yml'
+    ApiResponseStatus:
+      $ref: './components/schemas/api-response-status.yml'
+    ErrorDetail:
+      $ref: './components/schemas/error-detail.yml'
+
+tags:
+  - name: Public Notes
+    description: Public latest notes browsing (no authentication required)
+  - name: Personal Notebook
+    description: Private plain text note management (anonymous and regular users)
+  - name: User Profile
+    description: Basic user profile management (regular users only)
+  - name: Authentication
+    description: Authentication and session management

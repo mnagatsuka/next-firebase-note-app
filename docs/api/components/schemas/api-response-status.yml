@@ -1,0 +1,6 @@
+type: string
+description: Status of the API response
+enum:
+  - "success"
+  - "error"
+example: "success"

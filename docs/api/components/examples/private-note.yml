@@ -1,0 +1,7 @@
+value:
+  id: "550e8400-e29b-41d4-a716-446655440001"
+  userId: "user_789ghi"
+  title: "My Notes on React Hooks"
+  content: "My React Hooks Notes\n\nPersonal observations and learnings about React Hooks:\n\nKey Takeaways:\n- Hooks make functional components more powerful\n- useState is great for simple state management\n- useEffect replaces lifecycle methods\n\nQuestions to explore:\n- How do custom hooks work?\n- When should I use useReducer vs useState?\n- Performance implications of hooks"
+  createdAt: "2023-12-01T11:00:00Z"
+  updatedAt: "2023-12-01T16:45:00Z"

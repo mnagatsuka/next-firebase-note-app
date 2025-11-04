@@ -1,0 +1,61 @@
+# Keep placeholders
+!.gitkeep
+
+# macOS
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env*
+!.env.example
+
+# Node / pnpm
+node_modules/
+.pnpm-store/
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+
+# Next.js / Vercel
+.next/
+out/
+.vercel/
+
+# Build outputs / caches
+dist/
+storybook-static/
+logs/
+*.log
+*.log.*
+coverage/
+.nyc_output
+.turbo/
+.cache/
+
+# Testing artifacts
+.vitest/
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python virtualenv
+.venv/
+
+# Redocly temporary working files
+docs/ui/temp/**
+!docs/ui/temp/**/.gitkeep
+!docs/ui/temp/api/README.md
+
+# Generated or local docs artifacts
+docs/**/.DS_Store
+docs/api/openapi.bundled.yml

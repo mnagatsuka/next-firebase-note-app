@@ -1,0 +1,10 @@
+type: object
+description: Error response wrapper
+properties:
+  status:
+    $ref: "../../openapi.yml#/components/schemas/ApiResponseStatus"
+  error:
+    $ref: "../../openapi.yml#/components/schemas/ErrorDetail"
+required:
+  - status
+  - error

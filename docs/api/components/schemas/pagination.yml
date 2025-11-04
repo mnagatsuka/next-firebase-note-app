@@ -1,0 +1,33 @@
+type: object
+description: Pagination metadata for list responses
+properties:
+  page:
+    type: integer
+    minimum: 1
+    description: Current page number (1-based)
+    example: 2
+  limit:
+    type: integer
+    minimum: 1
+    maximum: 100
+    description: Number of items per page
+    example: 20
+  total:
+    type: integer
+    minimum: 0
+    description: Total number of items across all pages
+    example: 157
+  hasNext:
+    type: boolean
+    description: Whether there are more pages available
+    example: true
+  hasPrev:
+    type: boolean
+    description: Whether there are previous pages available
+    example: true
+required:
+  - page
+  - limit
+  - total
+  - hasNext
+  - hasPrev

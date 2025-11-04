@@ -1,0 +1,10 @@
+description: Resource not found
+content:
+  application/json:
+    schema:
+      $ref: "../../openapi.yml#/components/schemas/ErrorResponse"
+    example:
+      status: "error"
+      error:
+        code: "NOT_FOUND"
+        message: "The requested resource was not found"
